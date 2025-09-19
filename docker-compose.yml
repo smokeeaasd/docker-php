@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  php:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:80"
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  mysql:
+    container_name: mysql-db
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: root  
+      MYSQL_DATABASE: app
+    ports:  
+      - "3307:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    # Ensure MySQL is ready before PHP starts
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  mysql-data:
